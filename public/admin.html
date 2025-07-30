@@ -1,0 +1,66 @@
+<!-- public/admin.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard - Generate QR</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f3f4f6;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      margin-bottom: 1rem;
+    }
+
+    input, button {
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      margin: 0.5rem;
+    }
+
+    #message {
+      margin-top: 1rem;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin: Generate QR Codes</h1>
+
+  <form id="qrForm">
+  <label for="count">Number of QR Codes to Generate:</label>
+  <input type="number" id="count" name="count" required />
+  <button type="submit">Generate & Download</button>
+</form>
+
+<script>
+  document.getElementById("qrForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const count = document.getElementById("count").value;
+
+    const response = await fetch("/admin/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ count }),
+    });
+
+    if (response.ok) {
+      const blob = await response.blob();
+      const a = document.createElement("a");
+      a.href = window.URL.createObjectURL(blob);
+      a.download = "qr_codes.zip";
+      a.click();
+    } else {
+      alert("Failed to generate QR codes");
+    }
+  });
+</script>
+
+</body>
+</html>

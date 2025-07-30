@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Scratch & Win</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #f5f7fa, #c3cfe2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    .scratch-container {
+      position: relative;
+      width: 300px;
+      height: 150px;
+      margin: 20px;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      border-radius: 12px;
+      z-index: 2;
+    }
+
+    .amount-display {
+      width: 100%;
+      height: 100%;
+      background: white;
+      color: #2e7d32;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: bold;
+      border-radius: 12px;
+      z-index: 1;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    #redeemBtn {
+      display: none;
+      margin-top: 20px;
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    #redeemBtn:hover {
+      background-color: #43a047;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎉 Scratch & Win Cashback!</h1>
+  <div class="scratch-container">
+    <div class="amount-display" id="amount">₹<span id="cashback"></span></div>
+    <canvas id="scratchCanvas" width="300" height="150"></canvas>
+  </div>
+  <button id="redeemBtn">Redeem Now</button>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <script>
+    const cashbackAmount = Math.floor(Math.random() * 50) + 1;
+    document.getElementById('cashback').textContent = cashbackAmount;
+
+    const canvas = document.getElementById('scratchCanvas');
+    const ctx = canvas.getContext('2d');
+    const redeemBtn = document.getElementById('redeemBtn');
+
+    let isDrawing = false;
+    let confettiBlown = false;
+
+    // Fill canvas with gray overlay
+    ctx.fillStyle = "#D5D1E9";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Scratch handling
+    function scratch(x, y) {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.arc(x, y, 20, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function getPointerPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      if (e.touches) {
+        return {
+          x: e.touches[0].clientX - rect.left,
+          y: e.touches[0].clientY - rect.top
+        };
+      } else {
+        return {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
+      }
+    }
+
+    canvas.addEventListener('mousedown', () => isDrawing = true);
+    canvas.addEventListener('mouseup', () => isDrawing = false);
+    canvas.addEventListener('mousemove', (e) => {
+      if (!isDrawing) return;
+      const { x, y } = getPointerPos(e);
+      scratch(x, y);
+      checkScratch();
+    });
+
+    canvas.addEventListener('touchstart', (e) => {
+      isDrawing = true;
+      const { x, y } = getPointerPos(e);
+      scratch(x, y);
+      checkScratch();
+    });
+
+    canvas.addEventListener('touchend', () => isDrawing = false);
+    canvas.addEventListener('touchmove', (e) => {
+      if (!isDrawing) return;
+      e.preventDefault();
+      const { x, y } = getPointerPos(e);
+      scratch(x, y);
+      checkScratch();
+    }, { passive: false });
+
+    function checkScratch() {
+      const imageData = ctx.getImageData(canvas.width / 2 - 50, canvas.height / 2 - 20, 100, 40);
+      let transparentPixels = 0;
+
+      for (let i = 0; i < imageData.data.length; i += 4) {
+        if (imageData.data[i + 3] === 0) {
+          transparentPixels++;
+        }
+      }
+
+      const totalPixels = imageData.width * imageData.height;
+      const percent = (transparentPixels / totalPixels) * 100;
+
+      if (percent > 25 && !confettiBlown) {
+        confettiBlown = true;
+        showConfetti();
+        redeemBtn.style.display = 'inline-block';
+      }
+    }
+
+    function showConfetti() {
+      confetti({
+        particleCount: 150,
+        spread: 100,
+        origin: { y: 0.6 }
+      });
+    }
+
+    redeemBtn.addEventListener('click', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const code = urlParams.get('code');
+  if (!code) {
+    alert("Missing code");
+    return;
+  }
+
+  const amount = cashbackAmount;
+  const query = new URLSearchParams({ code, amount }).toString();
+  window.location.href = `/redeem-form.html?${query}`;
+});
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Redeem Cashback</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #eef2f3;
+    }
+    form {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      width: 300px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <form id="redeemForm">
+    <h3>Enter Details to Receive Cashback</h3>
+    <input type="text" name="name" placeholder="Full Name" required />
+    <input type="tel" name="phone" placeholder="Phone Number" required />
+    <input type="text" name="upi" placeholder="Your UPI ID" required />
+    <input type="hidden" name="amount" id="amountInput" />
+    <input type="hidden" name="code" id="codeInput" />
+    <button type="submit">Get Cashback</button>
+  </form>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    document.getElementById("amountInput").value = urlParams.get("amount");
+    document.getElementById("codeInput").value = urlParams.get("code");
+
+    document.getElementById("redeemForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+
+      const res = await fetch("/redeem-cashback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const msg = await res.text();
+      alert(msg);
+    });
+  </script>
+</body>
+</html>

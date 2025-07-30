@@ -1,0 +1,20 @@
+{
+  "name": "redeem-cashback",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "canvas": "^3.1.2",
+    "express": "^5.1.0",
+    "pg": "^8.16.3",
+    "qrcode": "^1.5.4",
+    "uuid": "^11.1.0"
+  }
+}
